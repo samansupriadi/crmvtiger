@@ -1,0 +1,41 @@
+version: "3.9"
+services:
+  vtiger:
+    image: javanile/vtiger:7.1.0
+    environment:
+      - VT_SITE_URL=http://crm.staging:8080
+      - MYSQL_HOST=vtiger-db
+      - MYSQL_DATABASE=vtigercrm
+      - MYSQL_ROOT_PASSWORD=vtigercrm
+    ports:
+      - 8080:80
+    volumes:
+      - vtiger:/var/lib/vtiger
+  vtiger-db:
+    image: mariadb:5.5.60
+    restart: always
+    #ports:
+    #  - 3306:3306
+    security_opt:
+      - seccomp:unconfined
+    environment:
+    - MYSQL_DATABASE=vtigercrm
+    - MYSQL_ROOT_PASSWORD=vtigercrm
+    volumes:
+      - db_data:/var/lib/mysql:rw
+  phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        #container_name: phpmyadmin_crm
+        links:
+            - vtiger-db
+        environment:
+            PMA_HOST: vtiger-db
+            PMA_PORT: 3306
+            PMA_ARBITRARY: 1
+            restart: always
+        ports:
+            - '8082:80'
+
+volumes:
+  db_data:
+  vtiger:
